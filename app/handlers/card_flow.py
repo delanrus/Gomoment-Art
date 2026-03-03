@@ -276,3 +276,4 @@ async def pick_format(c: CallbackQuery, state: FSMContext, prompts: PromptsRepo)
         )
     finally:
         IN_FLIGHT.discard(user_id)
+
