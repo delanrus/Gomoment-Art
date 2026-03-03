@@ -77,7 +77,7 @@ def _is_set_welcome_media_caption(caption: str | None) -> bool:
     if not caption:
         return False
 
-    match = re.match(r"^/set_welcome_media(?:@(?P<mention>\w+))?(?:\s|$)", caption)
+    match = re.match(r"^/welcome(?:@(?P<mention>\w+))?(?:\s|$)", caption)
     if not match:
         return False
 
@@ -104,7 +104,7 @@ async def set_welcome_media(m: Message):
         media_type = "video"
         file_id = m.video.file_id
     else:
-        await m.answer("Пришли фото или видео вместе с командой /set_welcome_media")
+        await m.answer("Пришли фото или видео вместе с командой /welcome")
         return
 
     WelcomeMediaStore().save(media_type, file_id)
@@ -113,18 +113,18 @@ async def set_welcome_media(m: Message):
 
 
 
-@router.message(StateFilter("*"), Command("set_welcome_media"))
+@router.message(StateFilter("*"), Command("welcome"))
 async def set_welcome_media_prompt(m: Message):
     if not _is_admin(m.from_user.id if m.from_user else None):
         await m.answer(
-            "Команда /set_welcome_media доступна только администратору.\n"
+            "Команда /welcome доступна только администратору.\n"
             "Проверь, что ADMIN_USER_ID в .env равен твоему Telegram user id."
         )
         return
 
     await m.answer(
-        "Отправь фото или видео с подписью /set_welcome_media.\n"
-        "Например: прикрепи фото и в подписи напиши /set_welcome_media"
+        "Отправь фото или видео с подписью /welcome.\n"
+        "Например: прикрепи фото и в подписи напиши /welcome"
     )
 
 @router.message(StateFilter("*"), Command("clear_welcome_media"))
@@ -137,7 +137,7 @@ async def clear_welcome_media(m: Message):
     await m.answer("Приветственное медиа очищено. Будет текст по умолчанию.")
 
 
-@router.message(StateFilter("*"), Command("welcome_media_help"))
+@router.message(StateFilter("*"), Command("welcome_help"))
 async def welcome_media_help(m: Message):
     if not _is_admin(m.from_user.id if m.from_user else None):
         await m.answer(
@@ -148,9 +148,17 @@ async def welcome_media_help(m: Message):
 
     await m.answer(
         "Как выбрать медиа для приветствия:\n"
-        "1) Отправь фото/видео с подписью /set_welcome_media\n"
-        "2) Чтобы убрать медиа: /clear_welcome_media\n"
+        "1) Отправь фото/видео с подписью /welcome\n"
+        "2) Чтобы убрать медиа: /clear\n"
         "3) После этого /start отправит выбранное медиа с текстом."
+    )
+
+
+@router.message(StateFilter("*"), Command("help"))
+async def help_command(m: Message):
+    await m.answer(
+        "Этот бот помогает создавать праздничные открытки из твоих фотографий.\n"
+        "Отправь фото, выбери праздник, фразу и формат — бот сгенерирует готовую открытку."
     )
 
 @router.message(F.text == "/start")
@@ -299,6 +307,7 @@ async def pick_format(c: CallbackQuery, state: FSMContext, prompts: PromptsRepo)
         )
     finally:
         IN_FLIGHT.discard(user_id)
+
 
 
 
