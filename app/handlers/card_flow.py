@@ -1,4 +1,4 @@
-from __future__ import annotations
+import re
 
 from aiogram import Router, F
 from aiogram.filters import Command, StateFilter
@@ -68,7 +68,11 @@ def _is_admin(user_id: int | None) -> bool:
     return user_id is not None and settings.ADMIN_USER_ID is not None and user_id == settings.ADMIN_USER_ID
 
 
-@router.message(StateFilter("*"), Command("set_welcome_media", ignore_caption=False), F.photo | F.video)
+@router.message(
+    StateFilter("*"),
+    F.photo | F.video,
+    F.caption.regexp(re.compile(r"^/set_welcome_media(?:@\w+)?(?:\s|$)")),
+)
 async def set_welcome_media(m: Message):
     if not _is_admin(m.from_user.id if m.from_user else None):
         await m.answer("Эта команда доступна только администратору.")
@@ -90,7 +94,7 @@ async def set_welcome_media(m: Message):
 
 
 
-@router.message(StateFilter("*"), Command("set_welcome_media", ignore_caption=False))
+@router.message(StateFilter("*"), Command("set_welcome_media"))
 async def set_welcome_media_prompt(m: Message):
     if not _is_admin(m.from_user.id if m.from_user else None):
         await m.answer(
@@ -276,4 +280,5 @@ async def pick_format(c: CallbackQuery, state: FSMContext, prompts: PromptsRepo)
         )
     finally:
         IN_FLIGHT.discard(user_id)
+
 
