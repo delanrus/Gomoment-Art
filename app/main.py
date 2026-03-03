@@ -1,6 +1,14 @@
 import asyncio
 from aiogram import Bot, Dispatcher
 from aiogram.fsm.storage.memory import MemoryStorage
+import logging
+
+from app.config import settings
+from app.handlers.card_flow import router as card_router
+from app.services.prompts import PromptsRepo, PromptConfigError
+
+
+logger = logging.getLogger(__name__)
 
 from app.config import settings
 from app.handlers.card_flow import router as card_router
@@ -18,3 +26,4 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+
