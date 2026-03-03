@@ -23,7 +23,7 @@ IN_FLIGHT: set[int] = set()
 
 
 async def send_welcome_message(m: Message):
-    text = 
+    text = (
         "Привет👋 Меня зовут Руслан и я помогу вам удивить близких и создать им персональную открытку по вашей фотографии!\n\n"
         "Идея простая: Вы присылаете фото — я превращаю его в стильную праздничную открытку.\n\n"
         "К 8 марта💐\n"
@@ -31,6 +31,7 @@ async def send_welcome_message(m: Message):
         "На годовщину💞\n"
         "И к любому другому празднику.\n\n"
         "Присылай скорее фотографию того, кого хочешь поздравить!📷"
+    )
     media = resolve_welcome_media()
 
     if not media:
@@ -322,6 +323,7 @@ async def pick_format(c: CallbackQuery, state: FSMContext, prompts: PromptsRepo)
         )
     finally:
         IN_FLIGHT.discard(user_id)
+
 
 
 
