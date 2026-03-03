@@ -6,7 +6,7 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from app.states import CardFlow
 from app.services.prompts import PromptsRepo
-from app.queue.tasks import enqueue_generate
+# from app.queue.tasks import enqueue_generate
 
 router = Router()
 
@@ -109,3 +109,4 @@ async def pick_format(c: CallbackQuery, state: FSMContext):
         user_phrase=data["user_phrase"],
         fmt=fmt,
     )
+
