@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from aiogram import Router, F
+from aiogram.filters import Command
 from aiogram.types import Message, CallbackQuery, BufferedInputFile
 from aiogram.fsm.context import FSMContext
 from aiogram.utils.keyboard import InlineKeyboardBuilder
@@ -11,6 +12,7 @@ from app.services.prompts import PromptsRepo
 from app.services.telegram_files import download_photo_bytes
 from app.services.openai_images import OpenAIImageClient
 from app.config import settings
+from app.services.welcome_media import WelcomeMediaStore, resolve_welcome_media
 
 router = Router()
 
@@ -20,22 +22,18 @@ IN_FLIGHT: set[int] = set()
 
 async def send_welcome_message(m: Message):
     text = "Привет! Пришли фото, и я сделаю открытку 🎁"
-    media_type = (settings.WELCOME_MEDIA_TYPE or "").strip().lower()
-    media_file_id = (settings.WELCOME_MEDIA_FILE_ID or "").strip()
+    media = resolve_welcome_media()
 
-    if not media_type or not media_file_id:
+    if not media:
         await m.answer(text)
         return
 
+    media_type, media_file_id = media
     if media_type == "photo":
         await m.answer_photo(media_file_id, caption=text)
         return
 
-    if media_type == "video":
-        await m.answer_video(media_file_id, caption=text)
-        return
-
-    await m.answer(text)
+    await m.answer_video(media_file_id, caption=text)
 
 
 def kb_holidays(repo: PromptsRepo):
@@ -63,6 +61,54 @@ def kb_phrases(repo: PromptsRepo, holiday_key: str):
     kb.adjust(1)
     return kb.as_markup()
 
+
+
+
+def _is_admin(user_id: int | None) -> bool:
+    return user_id is not None and settings.ADMIN_USER_ID is not None and user_id == settings.ADMIN_USER_ID
+
+
+@router.message(Command("set_welcome_media"), F.photo | F.video)
+async def set_welcome_media(m: Message):
+    if not _is_admin(m.from_user.id if m.from_user else None):
+        await m.answer("Эта команда доступна только администратору.")
+        return
+
+    if m.photo:
+        media_type = "photo"
+        file_id = m.photo[-1].file_id
+    elif m.video:
+        media_type = "video"
+        file_id = m.video.file_id
+    else:
+        await m.answer("Пришли фото или видео вместе с командой /set_welcome_media")
+        return
+
+    WelcomeMediaStore().save(media_type, file_id)
+    await m.answer("Сохранил приветственное медиа ✅")
+
+
+@router.message(Command("clear_welcome_media"))
+async def clear_welcome_media(m: Message):
+    if not _is_admin(m.from_user.id if m.from_user else None):
+        await m.answer("Эта команда доступна только администратору.")
+        return
+
+    WelcomeMediaStore().clear()
+    await m.answer("Приветственное медиа очищено. Будет текст по умолчанию.")
+
+
+@router.message(Command("welcome_media_help"))
+async def welcome_media_help(m: Message):
+    if not _is_admin(m.from_user.id if m.from_user else None):
+        return
+
+    await m.answer(
+        "Как выбрать медиа для приветствия:\n"
+        "1) Отправь фото/видео с подписью /set_welcome_media\n"
+        "2) Чтобы убрать медиа: /clear_welcome_media\n"
+        "3) После этого /start отправит выбранное медиа с текстом."
+    )
 
 @router.message(F.text == "/start")
 async def start(m: Message, state: FSMContext):
