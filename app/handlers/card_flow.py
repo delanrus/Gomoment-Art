@@ -8,6 +8,11 @@ from app.states import CardFlow
 from app.services.prompts import PromptsRepo
 # from app.queue.tasks import enqueue_generate /// 1) Убираем очередь из кода/ Удаляем импорт и вызов enqueue_generate
 
+from aiogram.types import BufferedInputFile
+from app.config import settings
+from app.services.openai_images import OpenAIImageClient
+from app.services.telegram_files import download_photo_bytes
+
 router = Router()
 
 def kb_holidays(repo: PromptsRepo):
@@ -92,22 +97,77 @@ async def pick_phrase_text(m: Message, state: FSMContext):
     await state.set_state(CardFlow.waiting_format)
     await m.answer("Выбери формат:", reply_markup=kb_formats())
 
+# @router.callback_query(CardFlow.waiting_format, F.data.startswith("fmt:"))
+# async def pick_format(c: CallbackQuery, state: FSMContext):
+#     fmt = c.data.split(":", 1)[1]
+#     data = await state.get_data()
+#     await state.clear()
+
+#     await c.message.edit_text("Принято ✅ Генерирую открытку…")
+
+#     await enqueue_generate(
+#         telegram_chat_id=c.message.chat.id,
+#         telegram_message_id=c.message.message_id,
+#         user_id=c.from_user.id,
+#         photo_file_id=data["photo_file_id"],
+#         holiday_key=data["holiday_key"],
+#         user_phrase=data["user_phrase"],
+#         fmt=fmt,
+#     )
+
+# простой “антидубль”: один пользователь = одна генерация одновременно
+IN_FLIGHT: set[int] = set()
+
 @router.callback_query(CardFlow.waiting_format, F.data.startswith("fmt:"))
-async def pick_format(c: CallbackQuery, state: FSMContext):
-    fmt = c.data.split(":", 1)[1]
+async def pick_format(c: CallbackQuery, state: FSMContext, prompts: PromptsRepo):
+    user_id = c.from_user.id
+    if user_id in IN_FLIGHT:
+        await c.answer("Я уже делаю тебе открытку 🙂 Подожди немного.", show_alert=True)
+        return
+
+    fmt = c.data.split(":", 1)[1]  # "3:4" или "4:3"
     data = await state.get_data()
     await state.clear()
 
     await c.message.edit_text("Принято ✅ Генерирую открытку…")
 
-    await enqueue_generate(
-        telegram_chat_id=c.message.chat.id,
-        telegram_message_id=c.message.message_id,
-        user_id=c.from_user.id,
-        photo_file_id=data["photo_file_id"],
-        holiday_key=data["holiday_key"],
-        user_phrase=data["user_phrase"],
-        fmt=fmt,
-    )
+    IN_FLIGHT.add(user_id)
+    try:
+        # 1) скачиваем фото из Telegram в память (ничего не храним)
+        photo_bytes = await download_photo_bytes(c.bot, data["photo_file_id"])
+
+        # 2) формируем промпт из YAML
+        prompt, size, model = prompts.render_prompt(
+            data["holiday_key"],
+            data["user_phrase"],
+            fmt
+        )
+        quality = prompts.get_holiday(data["holiday_key"]).default_quality
+
+        # 3) вызываем OpenAI
+        client = OpenAIImageClient(settings.OPENAI_API_KEY)
+        out_bytes = client.edit_image(
+            image_bytes=photo_bytes,
+            prompt=prompt,
+            model=model,
+            size=size,
+            quality=quality,
+        )
+
+        # 4) отправляем картинку
+        await c.message.answer_photo(
+            BufferedInputFile(out_bytes, filename="card.png"),
+            caption="Готово 🎉"
+        )
+
+    except Exception:
+        # чтобы бот не “молчал” при ошибке
+        await c.message.answer(
+            "Упс 😕 Не получилось сгенерировать открытку. "
+            "Попробуй ещё раз через минуту."
+        )
+        raise
+    finally:
+        IN_FLIGHT.discard(user_id)
 
 
