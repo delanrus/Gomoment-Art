@@ -18,6 +18,26 @@ router = Router()
 IN_FLIGHT: set[int] = set()
 
 
+async def send_welcome_message(m: Message):
+    text = "Привет! Пришли фото, и я сделаю открытку 🎁"
+    media_type = (settings.WELCOME_MEDIA_TYPE or "").strip().lower()
+    media_file_id = (settings.WELCOME_MEDIA_FILE_ID or "").strip()
+
+    if not media_type or not media_file_id:
+        await m.answer(text)
+        return
+
+    if media_type == "photo":
+        await m.answer_photo(media_file_id, caption=text)
+        return
+
+    if media_type == "video":
+        await m.answer_video(media_file_id, caption=text)
+        return
+
+    await m.answer(text)
+
+
 def kb_holidays(repo: PromptsRepo):
     kb = InlineKeyboardBuilder()
     for h in repo.list_holidays():
@@ -48,7 +68,7 @@ def kb_phrases(repo: PromptsRepo, holiday_key: str):
 async def start(m: Message, state: FSMContext):
     await state.clear()
     await state.set_state(CardFlow.waiting_photo)
-    await m.answer("Привет! Пришли фото, и я сделаю открытку 🎁")
+    await send_welcome_message(m)
 
 
 @router.message(CardFlow.waiting_photo, F.photo)
@@ -190,4 +210,3 @@ async def pick_format(c: CallbackQuery, state: FSMContext, prompts: PromptsRepo)
         )
     finally:
         IN_FLIGHT.discard(user_id)
-
