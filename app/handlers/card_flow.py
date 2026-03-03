@@ -1,17 +1,17 @@
 import re
 import logging
+import asyncio
 
 from aiogram import Router, F
 from aiogram.filters import Command, StateFilter
 from aiogram.types import Message, CallbackQuery, BufferedInputFile
 from aiogram.fsm.context import FSMContext
 from aiogram.utils.keyboard import InlineKeyboardBuilder
-import asyncio
 
 from app.states import CardFlow
 from app.services.prompts import PromptsRepo
 from app.services.telegram_files import download_photo_bytes
-from app.services.openai_images import OpenAIImageClient
+from app.services.openai_images import OpenAIImageClient, OpenAIBillingLimitError
 from app.config import settings
 from app.services.welcome_media import WelcomeMediaStore, resolve_welcome_media
 
@@ -310,6 +310,17 @@ async def pick_format(c: CallbackQuery, state: FSMContext, prompts: PromptsRepo)
             caption="Готово 🎉"
         )
 
+    except OpenAIBillingLimitError:
+        logger.error(
+            "Card generation blocked by OpenAI billing limit for user=%s holiday=%s format=%s",
+            user_id,
+            data.get("holiday_key"),
+            fmt,
+        )
+        await c.message.answer(
+            "Сервис временно недоступен из-за лимита биллинга 😕\n"
+            "Мы уже занимаемся этим. Попробуй позже или напиши в поддержку: t.me/delanrus"
+        )
     except Exception:
         logger.exception(
             "Card generation failed for user=%s holiday=%s format=%s",
@@ -323,6 +334,7 @@ async def pick_format(c: CallbackQuery, state: FSMContext, prompts: PromptsRepo)
         )
     finally:
         IN_FLIGHT.discard(user_id)
+
 
 
 
