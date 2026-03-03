@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from aiogram import Router, F
-from aiogram.filters import Command
+from aiogram.filters import Command, StateFilter
 from aiogram.types import Message, CallbackQuery, BufferedInputFile
 from aiogram.fsm.context import FSMContext
 from aiogram.utils.keyboard import InlineKeyboardBuilder
@@ -68,7 +68,7 @@ def _is_admin(user_id: int | None) -> bool:
     return user_id is not None and settings.ADMIN_USER_ID is not None and user_id == settings.ADMIN_USER_ID
 
 
-@router.message(Command("set_welcome_media"), F.photo | F.video)
+@router.message(StateFilter("*"), Command("set_welcome_media", ignore_caption=False), F.photo | F.video)
 async def set_welcome_media(m: Message):
     if not _is_admin(m.from_user.id if m.from_user else None):
         await m.answer("Эта команда доступна только администратору.")
@@ -88,7 +88,23 @@ async def set_welcome_media(m: Message):
     await m.answer("Сохранил приветственное медиа ✅")
 
 
-@router.message(Command("clear_welcome_media"))
+
+
+@router.message(StateFilter("*"), Command("set_welcome_media", ignore_caption=False))
+async def set_welcome_media_prompt(m: Message):
+    if not _is_admin(m.from_user.id if m.from_user else None):
+        await m.answer(
+            "Команда /set_welcome_media доступна только администратору.\n"
+            "Проверь, что ADMIN_USER_ID в .env равен твоему Telegram user id."
+        )
+        return
+
+    await m.answer(
+        "Отправь фото или видео с подписью /set_welcome_media.\n"
+        "Например: прикрепи фото и в подписи напиши /set_welcome_media"
+    )
+
+@router.message(StateFilter("*"), Command("clear_welcome_media"))
 async def clear_welcome_media(m: Message):
     if not _is_admin(m.from_user.id if m.from_user else None):
         await m.answer("Эта команда доступна только администратору.")
@@ -98,9 +114,13 @@ async def clear_welcome_media(m: Message):
     await m.answer("Приветственное медиа очищено. Будет текст по умолчанию.")
 
 
-@router.message(Command("welcome_media_help"))
+@router.message(StateFilter("*"), Command("welcome_media_help"))
 async def welcome_media_help(m: Message):
     if not _is_admin(m.from_user.id if m.from_user else None):
+        await m.answer(
+            "Подсказка доступна только администратору.\n"
+            "Проверь, что ADMIN_USER_ID в .env равен твоему Telegram user id."
+        )
         return
 
     await m.answer(
