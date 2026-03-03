@@ -4,6 +4,7 @@ from aiogram import Router, F
 from aiogram.types import Message, CallbackQuery, BufferedInputFile
 from aiogram.fsm.context import FSMContext
 from aiogram.utils.keyboard import InlineKeyboardBuilder
+import asyncio
 
 from app.states import CardFlow
 from app.services.prompts import PromptsRepo
@@ -65,7 +66,13 @@ async def no_photo(m: Message):
 
 @router.callback_query(CardFlow.waiting_holiday, F.data.startswith("holiday:"))
 async def pick_holiday(c: CallbackQuery, state: FSMContext, prompts: PromptsRepo):
+    await c.answer()
     holiday_key = c.data.split(":", 1)[1]
+    if not prompts.has_holiday(holiday_key):
+        await c.message.edit_text("Не нашёл такой праздник. Нажми /start и выбери снова.")
+        await state.clear()
+        return
+
     await state.update_data(holiday_key=holiday_key)
     await state.set_state(CardFlow.waiting_phrase)
 
@@ -78,12 +85,22 @@ async def pick_holiday(c: CallbackQuery, state: FSMContext, prompts: PromptsRepo
 
 @router.callback_query(CardFlow.waiting_phrase, F.data.startswith("phrase:"))
 async def pick_phrase_button(c: CallbackQuery, state: FSMContext, prompts: PromptsRepo):
+    await c.answer()
     pick = c.data.split(":", 1)[1]
     data = await state.get_data()
-    holiday_key = data["holiday_key"]
+    holiday_key = data.get("holiday_key")
+
+    if not holiday_key or not prompts.has_holiday(holiday_key):
+        await c.message.edit_text("Сессия устарела. Нажми /start и начни заново 🙂")
+        await state.clear()
+        return
 
     if pick == "custom":
         await c.message.edit_text("Ок! Напиши свою фразу (2–60 символов):")
+        return
+
+    if not pick.isdigit():
+        await c.answer("Некорректный выбор фразы. Попробуй ещё раз.", show_alert=True)
         return
 
     idx = int(pick)
@@ -99,7 +116,7 @@ async def pick_phrase_button(c: CallbackQuery, state: FSMContext, prompts: Promp
 
 @router.message(CardFlow.waiting_phrase, F.text)
 async def pick_phrase_text(m: Message, state: FSMContext):
-    phrase = m.text.strip()
+    phrase = (m.text or "").strip()
     if len(phrase) < 2 or len(phrase) > 60:
         await m.answer("Сделай фразу покороче (2–60 символов). Напиши ещё раз:")
         return
@@ -116,7 +133,22 @@ async def pick_format(c: CallbackQuery, state: FSMContext, prompts: PromptsRepo)
         return
 
     fmt = c.data.split(":", 1)[1]  # "3:4" или "4:3"
+    if not prompts.has_format(fmt):
+        await c.answer("Некорректный формат. Выбери формат из кнопок.", show_alert=True)
+        return
+
     data = await state.get_data()
+    required_fields = ("photo_file_id", "holiday_key", "user_phrase")
+    if any(not data.get(k) for k in required_fields):
+        await c.message.edit_text("Сессия устарела. Нажми /start и начни заново 🙂")
+        await state.clear()
+        return
+
+    if not prompts.has_holiday(data["holiday_key"]):
+        await c.message.edit_text("Праздник больше недоступен. Нажми /start и выбери заново.")
+        await state.clear()
+        return
+
     await state.clear()
 
     await c.message.edit_text("Принято ✅ Генерирую открытку…")
@@ -136,7 +168,8 @@ async def pick_format(c: CallbackQuery, state: FSMContext, prompts: PromptsRepo)
 
         # 3) OpenAI image edit
         client = OpenAIImageClient(settings.OPENAI_API_KEY)
-        out_bytes = client.edit_image(
+        out_bytes = await asyncio.to_thread(
+            client.edit_image,
             image_bytes=photo_bytes,
             prompt=prompt,
             model=model,
@@ -155,6 +188,6 @@ async def pick_format(c: CallbackQuery, state: FSMContext, prompts: PromptsRepo)
             "Упс 😕 Не получилось сгенерировать открытку. "
             "Попробуй ещё раз через минуту."
         )
-        raise
     finally:
         IN_FLIGHT.discard(user_id)
+
