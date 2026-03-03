@@ -65,14 +65,33 @@ def kb_phrases(repo: PromptsRepo, holiday_key: str):
 
 
 def _is_admin(user_id: int | None) -> bool:
-    return user_id is not None and settings.ADMIN_USER_ID is not None and user_id == settings.ADMIN_USER_ID
+    if user_id is None:
+        return False
+
+    allowed_ids = {settings.ADMIN_USER_ID, settings.TELEGRAM_BOT_ID}
+    return user_id in allowed_ids
 
 
-@router.message(
-    StateFilter("*"),
-    F.photo | F.video,
-    F.caption.regexp(re.compile(r"^/set_welcome_media(?:@\w+)?(?:\s|$)")),
-)
+
+def _is_set_welcome_media_caption(caption: str | None) -> bool:
+    if not caption:
+        return False
+
+    match = re.match(r"^/set_welcome_media(?:@(?P<mention>\w+))?(?:\s|$)", caption)
+    if not match:
+        return False
+
+    mention = match.group("mention")
+    if mention is None:
+        return True
+
+    if mention.isdigit() and settings.TELEGRAM_BOT_ID is not None:
+        return int(mention) == settings.TELEGRAM_BOT_ID
+
+    return True
+
+
+@router.message(StateFilter("*"), F.photo | F.video, lambda m: _is_set_welcome_media_caption(m.caption))
 async def set_welcome_media(m: Message):
     if not _is_admin(m.from_user.id if m.from_user else None):
         await m.answer("Эта команда доступна только администратору.")
@@ -280,5 +299,6 @@ async def pick_format(c: CallbackQuery, state: FSMContext, prompts: PromptsRepo)
         )
     finally:
         IN_FLIGHT.discard(user_id)
+
 
 
