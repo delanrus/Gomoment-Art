@@ -160,14 +160,33 @@ async def pick_format(c: CallbackQuery, state: FSMContext, prompts: PromptsRepo)
             caption="Готово 🎉"
         )
 
-    except Exception:
-        # чтобы бот не “молчал” при ошибке
+    # except Exception:
+    #     # чтобы бот не “молчал” при ошибке
+    #     await c.message.answer(
+    #         "Упс 😕 Не получилось сгенерировать открытку. "
+    #         "Попробуй ещё раз через минуту."
+    #     )
+    #     raise
+    
+        except Exception as e:
+        text = str(e)
+
+        # OpenAI billing hard limit
+        if "billing_hard_limit" in text or "Billing hard limit" in text:
+            await c.message.answer(
+                "⚠️ Сейчас генерация недоступна: достигнут лимит оплаты OpenAI.\n"
+                "Нужно пополнить/увеличить лимит в OpenAI Billing, и всё заработает."
+            )
+            return
+
         await c.message.answer(
             "Упс 😕 Не получилось сгенерировать открытку. "
             "Попробуй ещё раз через минуту."
         )
         raise
+    
     finally:
         IN_FLIGHT.discard(user_id)
+
 
 
