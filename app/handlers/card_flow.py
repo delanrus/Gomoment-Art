@@ -168,7 +168,8 @@ async def welcome_media_help(m: Message):
 async def help_command(m: Message):
     await m.answer(
         "Этот бот помогает создавать праздничные открытки из твоих фотографий.\n"
-        "Отправь фото, выбери праздник, фразу и формат — бот сгенерирует готовую открытку."
+        "Отправь фото, выбери праздник, фразу и формат — бот сгенерирует готовую открытку.\n"
+        "Если у вас возникли вопросы, напишите напрямую в поддержку: t.me/delanrus"
     )
 
 @router.message(F.text == "/start")
@@ -334,6 +335,7 @@ async def pick_format(c: CallbackQuery, state: FSMContext, prompts: PromptsRepo)
         )
     finally:
         IN_FLIGHT.discard(user_id)
+
 
 
 
