@@ -12,8 +12,7 @@ class Settings(BaseSettings):
     ADMIN_USER_ID: int | None = None
     WELCOME_MEDIA_TYPE: str | None = None  # photo | video
     WELCOME_MEDIA_FILE_ID: str | None = None
+    WELCOME_MEDIA_STORE_PATH: str = "data/welcome_media.json"
 
 settings = Settings()
-
-
 
