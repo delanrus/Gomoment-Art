@@ -1,0 +1,59 @@
+holidays:
+  mar8:
+    title: "8 марта"
+    fixed_line: "С 8 марта!"
+    phrases:
+      - "Гнись, но не ломайся"
+      - "Пусть полёт не заканчивается"
+      - "Ты — весна"
+      - "Сияй каждый день"
+    prompt_template: |
+      Сделай открытку из этого фото. Сохрани черты лица и позу.
+      Открытка должна быть посвящена 8 марта с текстом [{user_phrase}] и [{fixed_line}].
+      Открытка сделана в стиле: A bold editorial fashion illustration rendered in thick oil pastel or wax crayon,
+      with chunky, textured strokes on visible sketchbook paper. It should feel chic and modern, focusing on outfit
+      and pose through expressive color blocks rather than outlines or realism.
+      Формат {format}.
+    default_quality: "low"
+    model: "gpt-image-1-mini"
+
+  feb23:
+    title: "23 февраля"
+    fixed_line: "С 23 февраля!"
+    phrases:
+      - "Силы и побед!"
+      - "Настоящему герою"
+      - "С праздником, защитник!"
+    prompt_template: |
+      Сделай открытку из этого фото. Сохрани черты лица и позу.
+      Открытка должна быть посвящена 23 февраля с текстом [{user_phrase}] и [{fixed_line}].
+      Открытка сделана в стиле: A bold editorial fashion illustration rendered in thick oil pastel or wax crayon,
+      with chunky, textured strokes on visible sketchbook paper.
+      Формат {format}.
+    default_quality: "low"
+    model: "gpt-image-1-mini"
+
+  birthday:
+    title: "День рождения"
+    fixed_line: "С Днём Рождения!"
+    phrases:
+      - "Пусть жизнь удивляет каждый день ✨"
+      - "Живи дерзко и ярко 🔥"
+      - "Счастья, любви и вдохновения!"
+    prompt_template: |
+      Сделай открытку из этого фото. Сохрани черты лица и позу.
+      Открытка ко Дню рождения с текстом [{user_phrase}] и [{fixed_line}].
+      Открытка сделана в стиле: A bold editorial fashion illustration rendered in thick oil pastel or wax crayon,
+      with chunky, textured strokes on visible sketchbook paper.
+      Формат {format}.
+    default_quality: "low"
+    model: "gpt-image-1-mini"
+
+formats:
+  "3:4":
+    size: "1024x1536"
+  "4:3":
+    size: "1536x1024"
+
+limits:
+  per_user_per_day: 5
