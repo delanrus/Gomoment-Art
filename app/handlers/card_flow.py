@@ -1,4 +1,5 @@
 import re
+import logging
 
 from aiogram import Router, F
 from aiogram.filters import Command, StateFilter
@@ -15,6 +16,7 @@ from app.config import settings
 from app.services.welcome_media import WelcomeMediaStore, resolve_welcome_media
 
 router = Router()
+logger = logging.getLogger(__name__)
 
 # простой “антидубль”: один пользователь = одна генерация одновременно
 IN_FLIGHT: set[int] = set()
@@ -301,12 +303,19 @@ async def pick_format(c: CallbackQuery, state: FSMContext, prompts: PromptsRepo)
         )
 
     except Exception:
+        logger.exception(
+            "Card generation failed for user=%s holiday=%s format=%s",
+            user_id,
+            data.get("holiday_key"),
+            fmt,
+        )
         await c.message.answer(
             "Упс 😕 Не получилось сгенерировать открытку. "
             "Попробуй ещё раз через минуту."
         )
     finally:
         IN_FLIGHT.discard(user_id)
+
 
 
 
