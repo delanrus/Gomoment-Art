@@ -10,7 +10,10 @@ class Settings(BaseSettings):
     REDIS_URL: str = "redis://localhost:6379/0"
     PROMPTS_PATH: str = "prompts/cards.yml"
     ADMIN_USER_ID: int | None = None
+    WELCOME_MEDIA_TYPE: str | None = None  # photo | video
+    WELCOME_MEDIA_FILE_ID: str | None = None
 
 settings = Settings()
+
 
 
