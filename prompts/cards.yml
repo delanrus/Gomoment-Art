@@ -10,9 +10,9 @@ holidays:
     prompt_template: |
       Сделай открытку из этого фото. Сохрани черты лица и позу.
       Открытка должна быть посвящена 8 марта с текстом [{user_phrase}] и [{fixed_line}].
-      Открытка сделана в стиле: A bold editorial fashion illustration rendered in thick oil pastel or wax crayon,
-      with chunky, textured strokes on visible sketchbook paper. It should feel chic and modern, focusing on outfit
-      and pose through expressive color blocks rather than outlines or realism.
+      Открытка сделана в стиле: А bold editorial fashion illustration rendered in thick oil pastel or wax crayon, 
+      with chunky, textured strokes on visible sketchbook paper. It should feel chic and modern, 
+      focusing on outfit and pose through expressive color blocks rather than outlines or realism.
       Формат {format}.
     default_quality: "low"
     model: "gpt-image-1-mini"
@@ -27,8 +27,9 @@ holidays:
     prompt_template: |
       Сделай открытку из этого фото. Сохрани черты лица и позу.
       Открытка должна быть посвящена 23 февраля с текстом [{user_phrase}] и [{fixed_line}].
-      Открытка сделана в стиле: A bold editorial fashion illustration rendered in thick oil pastel or wax crayon,
-      with chunky, textured strokes on visible sketchbook paper.
+      Открытка сделана в стиле: А bold editorial fashion illustration rendered in thick oil pastel or wax crayon, 
+      with chunky, textured strokes on visible sketchbook paper. It should feel chic and modern, 
+      focusing on outfit and pose through expressive color blocks rather than outlines or realism.
       Формат {format}.
     default_quality: "low"
     model: "gpt-image-1-mini"
@@ -43,8 +44,9 @@ holidays:
     prompt_template: |
       Сделай открытку из этого фото. Сохрани черты лица и позу.
       Открытка ко Дню рождения с текстом [{user_phrase}] и [{fixed_line}].
-      Открытка сделана в стиле: A bold editorial fashion illustration rendered in thick oil pastel or wax crayon,
-      with chunky, textured strokes on visible sketchbook paper.
+      Открытка сделана в стиле: А bold editorial fashion illustration rendered in thick oil pastel or wax crayon, 
+      with chunky, textured strokes on visible sketchbook paper. It should feel chic and modern, 
+      focusing on outfit and pose through expressive color blocks rather than outlines or realism.
       Формат {format}.
     default_quality: "low"
     model: "gpt-image-1-mini"
@@ -57,3 +59,4 @@ formats:
 
 limits:
   per_user_per_day: 5
+
