@@ -17,13 +17,13 @@ class OpenAIImageClient:
         size: str,
         quality: str,
     ) -> bytes:
-        # OpenAI SDK ожидает параметр image= (file-like), а не images=[...]
-        image_file = io.BytesIO(image_bytes)
-        image_file.name = "input.jpg"  # важно: некоторым клиентам нужно имя файла
+        # file-like объект с именем
+        bio = io.BytesIO(image_bytes)
+        bio.name = "input.jpg"
 
         resp = self.client.images.edit(
             model=model,
-            image=image_file,     # ✅ вот ключевая правка
+            image=[bio],          # ✅ ВАЖНО: передаём как list (array)
             prompt=prompt,
             size=size,
             quality=quality,
