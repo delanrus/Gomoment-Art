@@ -5,9 +5,11 @@ class Settings(BaseSettings):
 
     TELEGRAM_BOT_TOKEN: str
     OPENAI_API_KEY: str
+    DEMO_MODE: bool = False
 
     REDIS_URL: str = "redis://localhost:6379/0"
     PROMPTS_PATH: str = "prompts/cards.yml"
     ADMIN_USER_ID: int | None = None
 
 settings = Settings()
+
