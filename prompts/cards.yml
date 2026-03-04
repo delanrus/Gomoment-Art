@@ -9,12 +9,30 @@ holidays:
       - "Сияй каждый день"
       - "Мир с тобой прекраснее"
     prompt_template: |
-      Сделай открытку из этого фото. Сохрани черты лица и позу.
-      Открытка должна быть посвящена 8 марта с текстом [{user_phrase}] и [{fixed_line}].
-      Открытка сделана в стиле: А bold editorial fashion illustration rendered in thick oil pastel or wax crayon, 
-      with chunky, textured strokes on visible sketchbook paper. It should feel chic and modern, 
-      focusing on outfit and pose through expressive color blocks rather than outlines or realism.
-      Формат {format}.
+      Сделай поздравительную открытку к 8 марта на основе загруженного фото.
+
+      КРИТИЧНО:
+      - Сохрани узнаваемые черты лица девушки (глаза, нос, губы, форма лица), прическу и позу.
+      - Не меняй возраст, пол, телосложение и выражение лица.
+      - Сохрани общий силуэт и ракурс.
+
+      СТИЛЬ:
+      A bold editorial fashion illustration rendered in thick oil pastel or wax crayon,
+      with chunky textured strokes on visible sketchbook paper.
+      Chic and modern mood, expressive color blocks, minimal outlines, non-photorealistic.
+
+      КОМПОЗИЦИЯ:
+      - Вертикальная открытка, формат {format}.
+      - Девушка — главный акцент, аккуратный праздничный фон к 8 марта.
+      - Цвета: свежие весенние, выразительные, модные.
+
+      ТЕКСТ НА ОТКРЫТКЕ (на русском, без ошибок):
+      1) [{user_phrase}]
+      2) [{fixed_line}]
+
+      ТИПОГРАФИКА:
+      - Текст читаемый, гармонично встроен в дизайн.
+      - Не искажай и не сокращай фразы.
     default_quality: "high"
     model: "gpt-image-1.5"
 
@@ -60,6 +78,7 @@ formats:
 
 limits:
   per_user_per_day: 5
+
 
 
 
