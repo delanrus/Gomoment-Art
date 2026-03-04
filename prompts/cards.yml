@@ -16,7 +16,7 @@ holidays:
       focusing on outfit and pose through expressive color blocks rather than outlines or realism.
       Формат {format}.
     default_quality: "high"
-    model: "chatgpt-image-latest"
+    model: "gpt-image-1.5"
 
   feb23:
     title: "23 февраля"
@@ -33,7 +33,7 @@ holidays:
       focusing on outfit and pose through expressive color blocks rather than outlines or realism.
       Формат {format}.
     default_quality: "high"
-    model: "chatgpt-image-latest"
+    model: "gpt-image-1.5"
 
   birthday:
     title: "День рождения"
@@ -50,7 +50,7 @@ holidays:
       focusing on outfit and pose through expressive color blocks rather than outlines or realism.
       Формат {format}.
     default_quality: "high"
-    model: "chatgpt-image-latest"
+    model: "gpt-image-1.5"
 
 formats:
   "3:4":
@@ -60,6 +60,7 @@ formats:
 
 limits:
   per_user_per_day: 5
+
 
 
 
