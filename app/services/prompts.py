@@ -63,8 +63,8 @@ class PromptsRepo:
                 title=v["title"],
                 fixed_line=v["fixed_line"],
                 prompt_template=v["prompt_template"],
-                default_quality=v.get("default_quality", "low"),
-                model=v.get("model", "gpt-image-1-mini"),
+                default_quality=v.get("default_quality", "high"),
+                model=v.get("model", "gpt-image-1"),
             ))
         return out
 
@@ -75,8 +75,8 @@ class PromptsRepo:
             title=v["title"],
             fixed_line=v["fixed_line"],
             prompt_template=v["prompt_template"],
-            default_quality=v.get("default_quality", "low"),
-            model=v.get("model", "gpt-image-1-mini"),
+            default_quality=v.get("default_quality", "high"),
+            model=v.get("model", "gpt-image-1"),
         )
 
     def list_phrases(self, holiday_key: str) -> list[str]:
@@ -103,4 +103,5 @@ class PromptsRepo:
         )
         size = self.get_format_size(fmt)
         return prompt, size, h.model
+
 
