@@ -15,8 +15,8 @@ holidays:
       with chunky, textured strokes on visible sketchbook paper. It should feel chic and modern, 
       focusing on outfit and pose through expressive color blocks rather than outlines or realism.
       Формат {format}.
-    default_quality: "low"
-    model: "gpt-image-1-mini"
+    default_quality: "high"
+    model: "gpt-image-1"
 
   feb23:
     title: "23 февраля"
@@ -32,8 +32,8 @@ holidays:
       with chunky, textured strokes on visible sketchbook paper. It should feel chic and modern, 
       focusing on outfit and pose through expressive color blocks rather than outlines or realism.
       Формат {format}.
-    default_quality: "low"
-    model: "gpt-image-1-mini"
+    default_quality: "high"
+    model: "gpt-image-1"
 
   birthday:
     title: "День рождения"
@@ -49,8 +49,8 @@ holidays:
       with chunky, textured strokes on visible sketchbook paper. It should feel chic and modern, 
       focusing on outfit and pose through expressive color blocks rather than outlines or realism.
       Формат {format}.
-    default_quality: "low"
-    model: "gpt-image-1-mini"
+    default_quality: "high"
+    model: "gpt-image-1"
 
 formats:
   "3:4":
@@ -60,5 +60,6 @@ formats:
 
 limits:
   per_user_per_day: 5
+
 
 
