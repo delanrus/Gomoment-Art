@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import base64
 import io
-from openai import BadRequestError, OpenAI
+from openai import BadRequestError, OpenAI, PermissionDeniedError
 
 
 class OpenAIBillingLimitError(RuntimeError):
@@ -101,7 +101,7 @@ class OpenAIImageClient:
                 size=size,
                 quality=quality,
             )
-        except BadRequestError as exc:
+        except (BadRequestError, PermissionDeniedError) as exc:
             error_code = getattr(exc, "code", None)
             if error_code == "billing_hard_limit_reached":
                 raise OpenAIBillingLimitError("OpenAI billing hard limit reached") from exc
@@ -113,3 +113,4 @@ class OpenAIImageClient:
                 size=size,
                 quality=quality,
             )
+
